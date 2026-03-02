@@ -1,0 +1,4 @@
+﻿
+> wompi-backend@0.0.1 test
+> jest --ci src/modules/transactions/application/use-cases/CreateTransactionUseCase.spec.ts
+

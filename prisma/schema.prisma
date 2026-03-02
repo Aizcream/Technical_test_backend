@@ -1,0 +1,122 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+model Product {
+  id          String           @id @default(uuid()) @db.Uuid
+  name        String
+  price       Int              // Price in COP (e.g. 45000 = $45.000)
+  stock       Int
+  description String?
+  imageUrl    String?
+  category    String?          // "relojes", "perfumes", "zapatos"
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  variants         ProductVariant[]
+  transactionItems TransactionItem[]
+
+  @@map("products")
+}
+
+model ProductVariant {
+  id        String  @id @default(uuid()) @db.Uuid
+  productId String  @db.Uuid
+  label     String  // e.g. "Talla", "Concentración"
+  value     String  // e.g. "9", "Eau de Parfum"
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_variants")
+}
+
+model Client {
+  id             String        @id @default(uuid()) @db.Uuid
+  documentType   String?       // CC, NIT, etc
+  documentNumber String?
+  name           String
+  email          String        @unique
+  phone          String?
+  address        String?
+  country        String?       @default("Colombia")
+  region         String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  transactions   Transaction[]
+
+  @@map("clients")
+}
+
+model Transaction {
+  id                String            @id @default(uuid()) @db.Uuid
+  clientId          String            @db.Uuid
+  paymentProviderId String?           // ID from Wompi
+  amount            Int               // Total amount in COP
+  status            TransactionStatus @default(PENDING)
+  paymentMethod     String?
+  shippingAddress   String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  client            Client            @relation(fields: [clientId], references: [id])
+  items             TransactionItem[]
+  delivery          Delivery?
+
+  @@map("transactions")
+}
+
+model TransactionItem {
+  id            String      @id @default(uuid()) @db.Uuid
+  transactionId String      @db.Uuid
+  productId     String      @db.Uuid
+  quantity      Int
+  priceUnit     Int         // Price at the moment of purchase
+  selectedVariant String?   // e.g. "Talla: 9" or "Concentración: Eau de Parfum"
+
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  product       Product     @relation(fields: [productId], references: [id])
+
+  @@map("transaction_items")
+}
+
+model Delivery {
+  id                   String         @id @default(uuid()) @db.Uuid
+  transactionId        String         @unique @db.Uuid
+  status               DeliveryStatus @default(PENDING)
+  shippingCompany      String?
+  trackingNumber       String?
+  estimatedArrivalDate DateTime?
+  actualArrivalDate    DateTime?
+  shippingNotes        String?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  transaction          Transaction    @relation(fields: [transactionId], references: [id])
+
+  @@map("deliveries")
+}
+
+enum TransactionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REFUNDED
+}
+
+enum DeliveryStatus {
+  PENDING
+  PREPARING
+  IN_TRANSIT
+  DELIVERED
+  RETURNED
+  LOST
+}
