@@ -55,7 +55,11 @@ export class PrismaTransactionRepository implements ITransactionRepository {
     try {
       const data = await this.prisma.transaction.findUnique({
         where: { id },
-        include: { items: true },
+        include: {
+          items: {
+            include: { product: true },
+          },
+        },
       });
       if (!data) return ok(null);
 
@@ -68,6 +72,9 @@ export class PrismaTransactionRepository implements ITransactionRepository {
             i.quantity,
             i.priceUnit,
             i.selectedVariant,
+            i.product
+              ? { name: i.product.name, imageUrl: i.product.imageUrl }
+              : undefined,
           ),
       );
 
@@ -92,7 +99,12 @@ export class PrismaTransactionRepository implements ITransactionRepository {
   async findMany(): Promise<Result<Transaction[], DatabaseError>> {
     try {
       const data = await this.prisma.transaction.findMany({
-        include: { items: true, client: true },
+        include: {
+          items: {
+            include: { product: true },
+          },
+          client: true,
+        },
         orderBy: { createdAt: 'desc' },
       });
 
@@ -106,6 +118,9 @@ export class PrismaTransactionRepository implements ITransactionRepository {
               i.quantity,
               i.priceUnit,
               i.selectedVariant,
+              i.product
+                ? { name: i.product.name, imageUrl: i.product.imageUrl }
+                : undefined,
             ),
         );
         return Transaction.create({

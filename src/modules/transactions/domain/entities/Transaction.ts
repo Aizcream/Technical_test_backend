@@ -12,6 +12,7 @@ export class TransactionItem {
     public readonly quantity: number,
     public readonly priceUnit: number,
     public readonly selectedVariant: string | null,
+    public readonly product?: { name: string; imageUrl: string | null },
   ) {}
 }
 
