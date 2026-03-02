@@ -101,12 +101,13 @@ npm run test
 
 # Run tests with coverage report
 npm run test:cov
-```
 
+```<img width="915" height="519" alt="Captura de pantalla 2026-03-02 101044" src="https://github.com/user-attachments/assets/c6666fa5-54d9-4535-808c-293ce3e61865" />
 **Test Coverage Results:**
 As seen in our test executions, all core business logic (Use Cases and Controllers) maintain excellent coverage (above 90%), guaranteeing software reliability.
 
-![Jest Coverage Results](./test-coverage.png)
+
+
 _(Note: Placed the test coverage screenshot you have as `test-coverage.png` at the root of `wompi-backend` to display it here)._
 
 ## API Documentation
